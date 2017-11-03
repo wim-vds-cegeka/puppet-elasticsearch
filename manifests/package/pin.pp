@@ -46,7 +46,7 @@ class elasticsearch::package::pin {
           ],
         }
       } elsif ($elasticsearch::version != false) {
-        packagelock {
+        yum::versionlock {
           "0:elasticsearch-${elasticsearch::pkg_version}.noarch":
             ensure => $elasticsearch::ensure,
         }
