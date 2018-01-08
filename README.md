@@ -1035,3 +1035,4 @@ Please see the [CONTRIBUTING.md](CONTRIBUTING.md) file for instructions regardin
 ## Support
 
 Need help? Join us in [#elasticsearch](https://webchat.freenode.net?channels=%23elasticsearch) on Freenode IRC or on the [discussion forum](https://discuss.elastic.co/).
+
