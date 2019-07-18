@@ -543,7 +543,7 @@ class elasticsearch(
   validate_bool($config_hiera_merge)
 
   if $config_hiera_merge == true {
-    $x_config = hiera_hash('elasticsearch::config', $config)
+    $x_config = lookup({ 'name' => 'elasticsearch::config', 'default_value' => $config , merge => hash })
   } else {
     $x_config = $config
   }
@@ -552,7 +552,7 @@ class elasticsearch(
   validate_bool($indices_hiera_merge)
 
   if $indices_hiera_merge == true {
-    $x_indices = hiera_hash('elasticsearch::indices', $::elasticsearch::indices)
+    $x_indices = lookup({ 'name' => 'elasticsearch::indices', 'default_value' => $::elasticsearch::indices , merge => hash })
   } else {
     $x_indices = $indices
   }
@@ -566,7 +566,7 @@ class elasticsearch(
   validate_bool($instances_hiera_merge)
 
   if $instances_hiera_merge == true {
-    $x_instances = hiera_hash('elasticsearch::instances', $::elasticsearch::instances)
+    $x_instances = lookup({ 'name' => 'elasticsearch::instances', 'default_value' => $::elasticsearch::instances , merge => hash })
   } else {
     $x_instances = $instances
   }
@@ -580,7 +580,7 @@ class elasticsearch(
   validate_bool($pipelines_hiera_merge)
 
   if $pipelines_hiera_merge == true {
-    $x_pipelines = hiera_hash('elasticsearch::pipelines', $::elasticsearch::pipelines)
+    $x_pipelines = lookup({ 'name' => 'elasticsearch::pipelines', 'default_value' => $::elasticsearch::pipelines , merge => hash })
   } else {
     $x_pipelines = $pipelines
   }
@@ -594,7 +594,7 @@ class elasticsearch(
   validate_bool($plugins_hiera_merge)
 
   if $plugins_hiera_merge == true {
-    $x_plugins = hiera_hash('elasticsearch::plugins', $::elasticsearch::plugins)
+    $x_plugins = lookup({ 'name' => 'elasticsearch::plugins', 'default_value' => $::elasticsearch::plugins , merge => hash })
   } else {
     $x_plugins = $plugins
   }
@@ -608,7 +608,7 @@ class elasticsearch(
   validate_bool($roles_hiera_merge)
 
   if $roles_hiera_merge == true {
-    $x_roles = hiera_hash('elasticsearch::roles', $::elasticsearch::roles)
+    $x_roles = lookup({ 'name' => 'elasticsearch::roles', 'default_value' => $::elasticsearch::roles , merge => hash })
   } else {
     $x_roles = $roles
   }
@@ -622,7 +622,7 @@ class elasticsearch(
   validate_bool($scripts_hiera_merge)
 
   if $scripts_hiera_merge == true {
-    $x_scripts = hiera_hash('elasticsearch::scripts', $::elasticsearch::scripts)
+    $x_scripts = lookup({ 'name' => 'elasticsearch::scripts', 'default_value' => $::elasticsearch::scripts , merge => hash })
   } else {
     $x_scripts = $scripts
   }
@@ -636,7 +636,7 @@ class elasticsearch(
   validate_bool($templates_hiera_merge)
 
   if $templates_hiera_merge == true {
-    $x_templates = hiera_hash('elasticsearch::templates', $::elasticsearch::templates)
+    $x_templates = lookup({ 'name' => 'elasticsearch::templates', 'default_value' => $::elasticsearch::templates , merge => hash })
   } else {
     $x_templates = $templates
   }
@@ -650,7 +650,7 @@ class elasticsearch(
   validate_bool($users_hiera_merge)
 
   if $users_hiera_merge == true {
-    $x_users = hiera_hash('elasticsearch::users', $::elasticsearch::users)
+    $x_users = lookup({ 'name' =>'elasticsearch::users', 'default_value' => $::elasticsearch::users , merge => hash })
   } else {
     $x_users = $users
   }
