@@ -19,16 +19,12 @@ class elasticsearch::package {
     try_sleep => 10,
   }
 
-  #### Package management
-
-
-  # set params: in operation
   if $elasticsearch::ensure == 'present' {
 
     if $elasticsearch::restart_package_change {
-      Package[$elasticsearch::package_name] ~> Elasticsearch::Service <| |>
+      Package['elasticsearch'] ~> Elasticsearch::Service <| |>
     }
-    Package[$elasticsearch::package_name] ~> Exec['remove_plugin_dir']
+    Package['elasticsearch'] ~> Exec['remove_plugin_dir']
 
     # Create directory to place the package file
     $package_dir = $elasticsearch::package_dir
@@ -66,7 +62,7 @@ class elasticsearch::package {
     if ($elasticsearch::package_url != undef) {
 
       case $elasticsearch::package_provider {
-        'package': { $before = Package[$elasticsearch::package_name]  }
+        'package': { $before = Package['elasticsearch']  }
         default:   { fail("software provider \"${elasticsearch::package_provider}\".") }
       }
 
@@ -107,13 +103,26 @@ class elasticsearch::package {
             $exec_environment = []
           }
 
-          exec { 'download_package_elasticsearch':
-            command     => "${elasticsearch::params::download_tool} ${pkg_source} ${elasticsearch::package_url} 2> /dev/null",
-            creates     => $pkg_source,
-            environment => $exec_environment,
-            timeout     => $elasticsearch::package_dl_timeout,
-            require     => File[$package_dir],
-            before      => $before,
+          case $elasticsearch::download_tool {
+            String: {
+              $_download_command = if $elasticsearch::download_tool_verify_certificates {
+                $elasticsearch::download_tool
+              } else {
+                $elasticsearch::download_tool_insecure
+              }
+
+              exec { 'download_package_elasticsearch':
+                command     => "${_download_command} ${pkg_source} ${elasticsearch::package_url} 2> /dev/null",
+                creates     => $pkg_source,
+                environment => $exec_environment,
+                timeout     => $elasticsearch::package_dl_timeout,
+                require     => File[$package_dir],
+                before      => $before,
+              }
+            }
+            default: {
+              fail("no \$elasticsearch::download_tool defined for ${facts['os']['family']}")
+            }
           }
 
         }
@@ -144,12 +153,16 @@ class elasticsearch::package {
 
       }
 
+    } else {
+      if ($elasticsearch::manage_repo and $facts['os']['family'] == 'Debian') {
+        Class['apt::update'] -> Package['elasticsearch']
+      }
     }
 
   # Package removal
   } else {
 
-    if ($::osfamily == 'Suse') {
+    if ($facts['os']['family'] == 'Suse') {
       Package {
         provider  => 'rpm',
       }
@@ -162,13 +175,14 @@ class elasticsearch::package {
 
   if ($elasticsearch::package_provider == 'package') {
 
-    package { $elasticsearch::package_name:
+    package { 'elasticsearch':
       ensure => $package_ensure,
+      name   => $elasticsearch::_package_name,
     }
 
     exec { 'remove_plugin_dir':
       refreshonly => true,
-      command     => "rm -rf ${elasticsearch::plugindir}",
+      command     => "rm -rf ${elasticsearch::_plugindir}",
     }
 
 

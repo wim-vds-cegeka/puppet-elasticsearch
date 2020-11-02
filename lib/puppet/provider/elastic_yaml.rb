@@ -41,16 +41,11 @@ class Puppet::Provider::ElasticYaml < Puppet::Provider::ElasticParsedFile
       Hash[record.map { |k, v| [k.to_s, v] }]
     end.inject({}) do |hash, record|
       # Flatten array of hashes into single hash
-      hash.merge({ record['name'] => record.delete(@metadata.to_s) })
+      hash.merge(record['name'] => record.delete(@metadata.to_s))
     end.extend(Puppet_X::Elastic::SortedHash).to_yaml.split("\n")
 
     yaml.shift if yaml.first =~ /---/
     yaml = yaml.join("\n")
-
-    # Puppet < 4 uses ZAML, which prepends spaces in to_yaml... why
-    unless Puppet::Util::Package.versioncmp(Puppet.version, '4') >= 0
-      yaml.gsub!(/^\s{2}/, '')
-    end
 
     yaml << "\n"
   end

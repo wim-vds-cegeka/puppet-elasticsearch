@@ -25,10 +25,11 @@ Puppet::Type.type(:elasticsearch_keystore).provide(
 
   commands :keystore => "#{home_dir}/bin/elasticsearch-keystore"
 
-  def self.run_keystore(args, instance, stdin = nil)
+  def self.run_keystore(args, instance, configdir = '/etc/elasticsearch', stdin = nil)
     options = {
       :custom_environment => {
-        'ES_INCLUDE' => File.join(defaults_dir, "elasticsearch-#{instance}")
+        'ES_INCLUDE' => File.join(defaults_dir, "elasticsearch-#{instance}"),
+        'ES_PATH_CONF' => "#{configdir}/#{instance}"
       },
       :uid => 'elasticsearch',
       :gid => 'elasticsearch'
@@ -86,10 +87,12 @@ Puppet::Type.type(:elasticsearch_keystore).provide(
     @property_flush = {}
   end
 
+  # rubocop:disable Metrics/CyclomaticComplexity
+  # rubocop:disable Metrics/PerceivedComplexity
   def flush
     case @property_flush[:ensure]
     when :present
-      debug(self.class.run_keystore(['create'], resource[:name]))
+      debug(self.class.run_keystore(['create'], resource[:name], resource[:configdir]))
       @property_flush[:settings] = resource[:settings]
     when :absent
       File.delete(File.join([
@@ -105,7 +108,7 @@ Puppet::Type.type(:elasticsearch_keystore).provide(
         next unless @property_hash[:settings].nil? \
           or not @property_hash[:settings].include? setting
         debug(self.class.run_keystore(
-          ['add', '--force', '--stdin', setting], resource[:name], value
+          ['add', '--force', '--stdin', setting], resource[:name], resource[:configdir], value
         ))
       end
 
@@ -113,7 +116,7 @@ Puppet::Type.type(:elasticsearch_keystore).provide(
       if resource[:purge] and not (@property_hash.nil? or @property_hash[:settings].nil?)
         (@property_hash[:settings] - @property_flush[:settings].first.keys).each do |setting|
           debug(self.class.run_keystore(
-            ['remove', setting], resource[:name]
+            ['remove', setting], resource[:name], resource[:configdir]
           ))
         end
       end
@@ -123,6 +126,8 @@ Puppet::Type.type(:elasticsearch_keystore).provide(
       u[:name] == resource[:name]
     end
   end
+  # rubocop:enable Metrics/CyclomaticComplexity
+  # rubocop:enable Metrics/PerceivedComplexity
 
   # settings property setter
   #

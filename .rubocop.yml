@@ -1,4 +1,22 @@
-Metrics/BlockLength:
+AllCops:
+  Exclude:
+    - pkg/**/*
+    - spec/fixtures/**/*
+    - vendor/**/*
+  Include:
+    - Rakefile
+  TargetRubyVersion: 1.9
+
+Metrics/AbcSize:
+  Enabled: false
+
+Metrics/LineLength:
+  Enabled: false
+
+Metrics/MethodLength:
+  Enabled: false
+
+Metrics/ParameterLists:
   Enabled: false
 
 Style/AndOr:
@@ -10,7 +28,16 @@ Style/BlockDelimiters:
 Style/BlockEndNewline:
   Enabled: false
 
+Style/ClassAndModuleCamelCase:
+  Enabled: false
+
+Style/ClassAndModuleChildren:
+  Enabled: false
+
 Style/FirstParameterIndentation:
+  Enabled: false
+
+Style/FrozenStringLiteralComment:
   Enabled: false
 
 Style/HashSyntax:
@@ -19,14 +46,21 @@ Style/HashSyntax:
 Style/IndentArray:
   Enabled: false
 
+Style/Lambda:
+  Enabled: false
+
 Style/MultilineBlockChain:
   Enabled: false
 
 Style/MultilineBlockLayout:
   Enabled: false
 
-Style/MultilineIfModifier:
-  Enabled: false
-
 Style/Not:
   Enabled: false
+
+# This is the default post-0.41.2 rubocop, set it to be forward-compatible here.
+Style/PercentLiteralDelimiters:
+  PreferredDelimiters:
+    '%r': '{}'
+    '%w': '[]'
+    '%W': '[]'

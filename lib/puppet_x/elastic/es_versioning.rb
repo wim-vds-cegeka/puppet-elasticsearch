@@ -1,3 +1,5 @@
+class ElasticsearchPackageNotFoundError < StandardError; end
+
 module Puppet_X
   module Elastic
     # Assists with discerning the locally installed version of Elasticsearch.
@@ -12,11 +14,11 @@ module Puppet_X
         'data' => 'DATA_DIR',
         'work' => 'WORK_DIR',
         'conf' => 'CONF_DIR'
-      }
+      }.freeze
 
       # Create an array of command-line flags to append to an `elasticsearch`
       # startup command.
-      def self.opt_flags(package_name, catalog, opts = DEFAULT_OPTS)
+      def self.opt_flags(package_name, catalog, opts = DEFAULT_OPTS.dup)
         opt_flag = opt_flag(min_version('5.0.0', package_name, catalog))
 
         opts.delete 'work' if min_version '5.0.0', package_name, catalog
@@ -50,11 +52,16 @@ module Puppet_X
 
       # Fetch the package version for a locally installed package.
       def self.version(package_name, catalog)
-        if (es_pkg = catalog.resource("Package[#{package_name}]"))
-          es_pkg.provider.properties[:version] || es_pkg.provider.properties[:ensure]
-        else
-          raise Puppet::Error, "could not find `Package[#{package_name}]` resource"
+        es_pkg = catalog.resource("Package[#{package_name}]")
+        raise Puppet::Error, "could not find `Package[#{package_name}]` resource" unless es_pkg
+        [
+          es_pkg.provider.properties[:version],
+          es_pkg.provider.properties[:ensure]
+        ].each do |property|
+          return property if property.is_a? String
         end
+        Puppet.warning("could not find valid version for `Package[#{package_name}]` resource")
+        raise ElasticsearchPackageNotFoundError
       end
     end
   end

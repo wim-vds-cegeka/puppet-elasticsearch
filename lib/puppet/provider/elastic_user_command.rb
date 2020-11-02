@@ -1,7 +1,6 @@
 # Parent provider for Elasticsearch Shield/X-Pack file-based user management
 # tools.
 class Puppet::Provider::ElasticUserCommand < Puppet::Provider
-
   attr_accessor :homedir
 
   # Elasticsearch's home directory.
@@ -17,8 +16,17 @@ class Puppet::Provider::ElasticUserCommand < Puppet::Provider
   end
 
   # Run the user management command with specified tool arguments.
-  def self.command_with_path(args)
-    users_cli(args.is_a?(Array) ? args : [args])
+  def self.command_with_path(args, configdir = nil)
+    options = {
+      :custom_environment => {
+        'ES_PATH_CONF' => configdir || '/etc/elasticsearch'
+      }
+    }
+
+    execute(
+      [command(:users_cli)] + (args.is_a?(Array) ? args : [args]),
+      options
+    )
   end
 
   # Gather local file-based users into an array of Hash objects.
@@ -41,7 +49,7 @@ class Puppet::Provider::ElasticUserCommand < Puppet::Provider
       {
         :name => user,
         :ensure => :present,
-        :provider => name,
+        :provider => name
       }
     end
   end
@@ -81,7 +89,7 @@ class Puppet::Provider::ElasticUserCommand < Puppet::Provider
       arguments << '-p' << resource[:password]
     end
 
-    self.class.command_with_path(arguments)
+    self.class.command_with_path(arguments, resource[:configdir])
     @property_hash = self.class.fetch_users.detect do |u|
       u[:name] == resource[:name]
     end
@@ -103,10 +111,13 @@ class Puppet::Provider::ElasticUserCommand < Puppet::Provider
 
   # Manually set this user's password.
   def passwd
-    self.class.command_with_path([
-      'passwd',
-      resource[:name],
-      '-p', resource[:password]
-    ])
+    self.class.command_with_path(
+      [
+        'passwd',
+        resource[:name],
+        '-p', resource[:password]
+      ],
+      resource[:configdir]
+    )
   end
 end
