@@ -1,4 +1,6 @@
-require File.join(File.dirname(__FILE__), '..', '..', '..', 'puppet/provider/elastic_user_command')
+$LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', '..', '..'))
+
+require 'puppet/provider/elastic_user_command'
 
 Puppet::Type.type(:elasticsearch_user).provide(
   :users,
